@@ -14,9 +14,8 @@
 free-claude-code-termux/
 ├── README.md                    # Основная документация
 ├── LICENSE                      # Лицензия MIT
+├── .gitignore                   # Игнорируемые файлы
 ├── CHANGELOG.md                 # История изменений
-├── PROJECT_INFO.md              # Информация о проекте
-├── GITHUB_UPLOAD.md             # Инструкции по загрузке на GitHub
 ├── scripts/                     # Установочные скрипты
 │   ├── termux_installer.sh     # Полный установщик
 │   ├── quick_install.sh        # Быстрый установщик

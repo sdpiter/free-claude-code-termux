@@ -1,196 +1,304 @@
-#!/data/data/com.termux/files/usr/bin/bash
-
-#############################################
+#!/usr/bin/env bash
+#
 # Free Claude Code - Installation Checker
-# Проверка установки и диагностика
-#############################################
+# Скрипт проверки установки Free Claude Code для Android (Termux)
+# Версия: 1.0.0
+#
 
-# Цвета
+# Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Счетчики
+PASSED=0
+FAILED=0
+WARNINGS=0
+
+# Функции для вывода
 print_header() {
-    echo -e "${GREEN}"
-    echo "========================================"
-    echo "  Free Claude Code - Проверка установки"
-    echo "========================================"
+    echo -e "${CYAN}"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║                                                            ║"
+    echo "║   🔍 Free Claude Code - Installation Checker              ║"
+    echo "║                                                            ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
 
-print_status() {
-    local name=$1
-    local status=$2
-    local version=$3
-
-    if [ "$status" = "ok" ]; then
-        echo -e "${GREEN}✅ $name${NC}"
-        if [ -n "$version" ]; then
-            echo -e "   Версия: $version"
-        fi
-    elif [ "$status" = "warning" ]; then
-        echo -e "${YELLOW}⚠️  $name${NC}"
-        if [ -n "$version" ]; then
-            echo -e "   $version"
-        fi
-    else
-        echo -e "${RED}❌ $name${NC}"
-        if [ -n "$version" ]; then
-            echo -e "   $version"
-        fi
-    fi
+print_success() {
+    echo -e "${GREEN}✅ PASS${NC} - $1"
+    ((PASSED++))
 }
 
+print_error() {
+    echo -e "${RED}❌ FAIL${NC} - $1"
+    ((FAILED++))
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  WARN${NC} - $1"
+    ((WARNINGS++))
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  INFO${NC} - $1"
+}
+
+print_section() {
+    echo ""
+    echo -e "${CYAN}━━━ $1 ━━━${NC}"
+}
+
+# Проверка команды
 check_command() {
     local cmd=$1
     local name=$2
 
     if command -v $cmd &> /dev/null; then
-        local version=$($cmd --version 2>&1 | head -n 1 || echo "установлен")
-        print_status "$name" "ok" "$version"
-        return 0
+        local version=$($cmd --version 2>&1 | head -1)
+        print_success "$name установлен: $version"
     else
-        print_status "$name" "error" "не установлен"
-        return 1
+        print_error "$name не установлен"
     fi
 }
 
+# Проверка файла
 check_file() {
     local file=$1
     local name=$2
 
     if [ -f "$file" ]; then
-        print_status "$name" "ok" "существует"
-        return 0
+        print_success "$name существует"
     else
-        print_status "$name" "error" "не найден"
-        return 1
+        print_error "$name не найден"
     fi
 }
 
-check_directory() {
+# Проверка папки
+check_dir() {
     local dir=$1
     local name=$2
 
     if [ -d "$dir" ]; then
-        print_status "$name" "ok" "существует"
-        return 0
+        print_success "$name существует"
     else
-        print_status "$name" "error" "не найден"
-        return 1
+        print_error "$name не найден"
     fi
 }
 
+# Проверка порта
 check_port() {
     local port=$1
     local name=$2
 
     if netstat -tuln 2>/dev/null | grep -q ":$port "; then
-        print_status "$name" "warning" "порт занят"
-        return 1
+        print_success "$name порт $port открыт"
     else
-        print_status "$name" "ok" "порт свободен"
-        return 0
+        print_warning "$name порт $port не используется"
     fi
 }
 
+# Проверка интернет-соединения
 check_internet() {
-    if ping -c 1 google.com &> /dev/null; then
-        print_status "Интернет" "ok" "доступен"
+    print_section "Проверка интернет-соединения"
+
+    if ping -c 1 -W 5 google.com &> /dev/null; then
+        print_success "Интернет-соединение есть"
+    else
+        print_error "Нет интернет-соединения"
+    fi
+}
+
+# Проверка системы
+check_system() {
+    print_section "Проверка системы"
+
+    # Версия Android
+    local android_version=$(getprop ro.build.version.release)
+    print_info "Версия Android: $android_version"
+
+    # Архитектура
+    local arch=$(uname -m)
+    print_info "Архитектура: $arch"
+
+    # Свободное место
+    local free_space=$(df -m . | tail -1 | awk '{print $4}')
+    if [ "$free_space" -ge 2048 ]; then
+        print_success "Свободного места: ${free_space} МБ"
+    else
+        print_warning "Мало свободного места: ${free_space} МБ"
+    fi
+
+    # Память
+    local total_mem=$(free -m | grep Mem | awk '{print $2}')
+    print_info "Всего памяти: ${total_mem} МБ"
+}
+
+# Проверка Python
+check_python() {
+    print_section "Проверка Python"
+
+    check_command "python" "Python"
+    check_command "python3" "Python 3"
+
+    # Проверка pip
+    if command -v pip &> /dev/null; then
+        print_success "pip установлен"
+    else
+        print_error "pip не установлен"
+    fi
+}
+
+# Проверка uv
+check_uv() {
+    print_section "Проверка uv"
+
+    check_command "uv" "uv"
+
+    # Проверка PATH
+    if echo $PATH | grep -q "$HOME/.local/bin"; then
+        print_success "uv в PATH"
+    else
+        print_warning "uv не в PATH (добавьте в ~/.bashrc)"
+    fi
+}
+
+# Проверка Free Claude Code
+check_fcc() {
+    print_section "Проверка Free Claude Code"
+
+    check_command "fcc-server" "fcc-server"
+    check_command "fcc" "fcc"
+
+    # Проверка скриптов запуска
+    check_file "$HOME/start_fcc_server.sh" "Скрипт запуска сервера"
+    check_file "$HOME/start_fcc_claude.sh" "Скрипт запуска Claude Code"
+
+    # Проверка конфигурации
+    check_dir "$HOME/.config/fcc" "Папка конфигурации"
+    check_file "$HOME/.config/fcc/config.yaml" "Файл конфигурации"
+}
+
+# Проверка процессов
+check_processes() {
+    print_section "Проверка процессов"
+
+    if pgrep -f "fcc-server" > /dev/null; then
+        print_success "fcc-server запущен"
+    else
+        print_warning "fcc-server не запущен"
+    fi
+
+    if pgrep -f "fcc" > /dev/null; then
+        print_success "fcc запущен"
+    else
+        print_warning "fcc не запущен"
+    fi
+}
+
+# Проверка портов
+check_ports() {
+    print_section "Проверка портов"
+
+    check_port 8082 "Free Claude Code"
+}
+
+# Проверка логов
+check_logs() {
+    print_section "Проверка логов"
+
+    if [ -f "$HOME/.config/fcc/logs/server.log" ]; then
+        local log_size=$(du -h "$HOME/.config/fcc/logs/server.log" | cut -f1)
+        print_success "Лог сервера существует: $log_size"
+    else
+        print_warning "Лог сервера не найден"
+    fi
+}
+
+# Проверка зависимостей
+check_dependencies() {
+    print_section "Проверка зависимостей"
+
+    check_command "git" "Git"
+    check_command "curl" "cURL"
+    check_command "wget" "wget"
+    check_command "tar" "tar"
+    check_command "unzip" "unzip"
+}
+
+# Итоговый отчет
+print_summary() {
+    echo ""
+    echo -e "${CYAN}━━━ Итоговый отчет ━━━${NC}"
+    echo ""
+    echo -e "${GREEN}✅ Пройдено: $PASSED${NC}"
+    echo -e "${RED}❌ Ошибки: $FAILED${NC}"
+    echo -e "${YELLOW}⚠️  Предупреждения: $WARNINGS${NC}"
+    echo ""
+
+    if [ $FAILED -eq 0 ]; then
+        echo -e "${GREEN}🎉 Все проверки пройдены!${NC}"
         return 0
     else
-        print_status "Интернет" "error" "недоступен"
+        echo -e "${RED}❌ Обнаружены ошибки. Пожалуйста, исправьте их.${NC}"
         return 1
     fi
 }
 
-check_disk_space() {
-    local free_space=$(df ~ | tail -1 | awk '{print $4}')
-    local free_gb=$((free_space / 1024 / 1024))
+# Рекомендации
+print_recommendations() {
+    if [ $FAILED -gt 0 ] || [ $WARNINGS -gt 0 ]; then
+        echo ""
+        echo -e "${CYAN}━━━ Рекомендации ━━━${NC}"
+        echo ""
 
-    if [ $free_gb -gt 2 ]; then
-        print_status "Дисковое пространство" "ok" "${free_gb} ГБ свободно"
-        return 0
-    else
-        print_status "Дисковое пространство" "warning" "менее 2 ГБ свободно"
-        return 1
+        if [ $FAILED -gt 0 ]; then
+            echo -e "${YELLOW}Для исправления ошибок:${NC}"
+            echo -e "  1. Запустите установщик: ${GREEN}bash ~/free-claude-code-termux/scripts/termux_installer.sh${NC}"
+            echo -e "  2. Или быстрый установщик: ${GREEN}bash ~/free-claude-code-termux/scripts/quick_install.sh${NC}"
+            echo ""
+        fi
+
+        if ! echo $PATH | grep -q "$HOME/.local/bin"; then
+            echo -e "${YELLOW}Добавьте uv в PATH:${NC}"
+            echo -e "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
+            echo -e "  source ~/.bashrc"
+            echo ""
+        fi
+
+        if ! pgrep -f "fcc-server" > /dev/null; then
+            echo -e "${YELLOW}Запустите сервер:${NC}"
+            echo -e "  ${GREEN}~/start_fcc_server.sh${NC}"
+            echo ""
+        fi
     fi
 }
 
+# Главная функция
 main() {
     print_header
 
-    local errors=0
-    local warnings=0
+    # Проверки
+    check_internet
+    check_system
+    check_python
+    check_uv
+    check_fcc
+    check_dependencies
+    check_processes
+    check_ports
+    check_logs
 
-    echo -e "${BLUE}📱 Система:${NC}"
-    check_internet || ((errors++))
-    check_disk_space || ((warnings++))
-    echo ""
+    # Итог
+    print_summary
+    print_recommendations
 
-    echo -e "${BLUE}🔧 Базовые пакеты:${NC}"
-    check_command "git" "Git" || ((errors++))
-    check_command "python" "Python" || ((errors++))
-    check_command "pip" "Pip" || ((errors++))
-    check_command "curl" "Curl" || ((errors++))
-    check_command "wget" "Wget" || ((errors++))
-    check_command "node" "Node.js" || ((errors++))
-    check_command "npm" "NPM" || ((errors++))
-    echo ""
-
-    echo -e "${BLUE}📦 Python инструменты:${NC}"
-    check_command "uv" "uv" || ((errors++))
-    check_command "python3.14" "Python 3.14" || ((errors++))
-    echo ""
-
-    echo -e "${BLUE}🤖 Claude Code:${NC}"
-    check_command "claude" "Claude Code CLI" || ((errors++))
-    check_command "fcc-server" "Free Claude Code" || ((errors++))
-    echo ""
-
-    echo -e "${BLUE}📁 Файлы и директории:${NC}"
-    check_directory "$HOME/.local/bin" "Local bin" || ((warnings++))
-    check_directory "$HOME/.config/fcc" "Config directory" || ((warnings++))
-    check_file "$HOME/start_fcc_server.sh" "Start server script" || ((warnings++))
-    check_file "$HOME/start_fcc_claude.sh" "Start Claude script" || ((warnings++))
-    check_file "$HOME/FCC_INSTRUCTIONS.txt" "Instructions file" || ((warnings++))
-    echo ""
-
-    echo -e "${BLUE}🌐 Сеть:${NC}"
-    check_port 8082 "Порт 8082" || ((warnings++))
-    echo ""
-
-    echo -e "${GREEN}========================================${NC}"
-    if [ $errors -eq 0 ] && [ $warnings -eq 0 ]; then
-        echo -e "${GREEN}✅ Всё установлено правильно!${NC}"
-        echo ""
-        echo "🚀 Для запуска:"
-        echo "   ~/start_fcc_server.sh"
-        echo ""
-        echo "⚙️  После запуска откройте:"
-        echo "   http://127.0.0.1:8082/admin"
-    elif [ $errors -eq 0 ]; then
-        echo -e "${YELLOW}⚠️  Установка завершена с предупреждениями${NC}"
-        echo ""
-        echo "Предупреждения: $warnings"
-        echo "Ошибки: $errors"
-        echo ""
-        echo "Система должна работать, но проверьте предупреждения выше."
-    else
-        echo -e "${RED}❌ Обнаружены ошибки!${NC}"
-        echo ""
-        echo "Ошибки: $errors"
-        echo "Предупреждения: $warnings"
-        echo ""
-        echo "Рекомендуется переустановить:"
-        echo "bash termux_installer.sh"
-    fi
-    echo -e "${GREEN}========================================${NC}"
-
-    return $errors
+    exit $FAILED
 }
 
+# Запуск
 main
-exit $?

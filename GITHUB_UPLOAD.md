@@ -16,7 +16,6 @@ LICENSE
 .gitignore
 CHANGELOG.md
 PROJECT_INFO.md
-GITHUB_UPLOAD.md
 scripts/
 config/
 docs/

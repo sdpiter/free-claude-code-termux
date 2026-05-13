@@ -126,10 +126,6 @@ bash ~/free-claude-code-termux/scripts/check_install.sh
 ```
 free-claude-code-termux/
 ├── README.md
-├── LICENSE
-├── CHANGELOG.md
-├── PROJECT_INFO.md
-├── GITHUB_UPLOAD.md
 ├── scripts/
 │   ├── termux_installer.sh    # Полный установщик
 │   ├── quick_install.sh       # Быстрый установщик
@@ -173,7 +169,7 @@ uv tool upgrade --force git+https://github.com/Alishahryar1/free-claude-code.git
 
 ## 📄 Лицензия
 
-MIT License - см. файл LICENSE
+MIT License
 
 ---
 

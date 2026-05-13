@@ -1,106 +1,176 @@
-# 🚀 Free Claude Code - Termux Quick Start
+# 🚀 Быстрый старт - Free Claude Code Termux
 
-## ⚡ Быстрая установка (3 команды)
+## ⚡ Установка за 3 шага
 
+### 1. Установите Termux
+Скачайте Termux из F-Droid: https://f-droid.org/packages/com.termux/
+
+### 2. Запустите установщик
 ```bash
-# 1. Скачайте и запустите установщик
-curl -L https://raw.githubusercontent.com/Alishahryar1/free-claude-code/main/termux_installer.sh | bash
+curl -L https://raw.githubusercontent.com/Alishahryar1/free-claude-code-termux/main/scripts/termux_installer.sh | bash
+```
 
-# 2. Запустите сервер
+### 3. Настройте и запустите
+```bash
+# Запустите сервер
 ~/start_fcc_server.sh
 
-# 3. В новом терминале запустите Claude Code
+# В новом терминале запустите Claude Code
 ~/start_fcc_claude.sh
 ```
 
-## 🎯 После установки
-
 Откройте в браузере: `http://127.0.0.1:8082/admin`
 
-Вставьте API ключ от одного из провайдеров:
-- **OpenRouter**: https://openrouter.ai/
-- **DeepSeek**: https://platform.deepseek.com/
-- **NVIDIA NIM**: https://build.nvidia.com/
+## 🎯 Первые шаги
 
-## 📱 Где взять API ключ?
+### Получение API ключа
 
-### OpenRouter (рекомендуется)
-1. Зайдите на https://openrouter.ai/
-2. Зарегистрируйтесь
-3. Получите API ключ в настройках
-4. Вставьте в админ-панели
+**Бесплатные варианты:**
+- **DeepSeek** - https://platform.deepseek.com/ (бесплатно)
+- **NVIDIA NIM** - https://build.nvidia.com/ (бесплатно)
+- **OpenRouter** - https://openrouter.ai/ (доступно)
 
-### DeepSeek (бесплатно)
-1. Зайдите на https://platform.deepseek.com/
-2. Зарегистрируйтесь
-3. Получите бесплатный API ключ
-4. Вставьте в админ-панели
+### Настройка
 
-### NVIDIA NIM (бесплатно)
-1. Зайдите на https://build.nvidia.com/
-2. Зарегистрируйтесь
-3. Получите бесплатный API ключ
-4. Вставьте в админ-панели
+1. Откройте `http://127.0.0.1:8082/admin`
+2. Вставьте ваш API ключ
+3. Выберите модель
+4. Сохраните настройки
 
-## 🔧 Полезные команды
+## 💻 Основные команды
 
+### Запуск
 ```bash
-# Проверка установки
-bash check_install.sh
+# Запуск сервера
+~/start_fcc_server.sh
 
-# Просмотр инструкций
-cat ~/FCC_INSTRUCTIONS.txt
+# Запуск Claude Code CLI
+~/start_fcc_claude.sh
+```
 
+### Управление
+```bash
+# Остановка сервера
+pkill fcc-server
+
+# Проверка статуса
+pgrep -f fcc-server
+
+# Просмотр логов
+tail -f ~/.config/fcc/logs/server.log
+```
+
+### Проверка установки
+```bash
+# Полная проверка
+bash ~/free-claude-code-termux/scripts/check_install.sh
+```
+
+## 🔧 Конфигурация
+
+### Изменение порта
+```bash
+# Отредактируйте скрипт запуска
+nano ~/start_fcc_server.sh
+
+# Измените порт
+fcc-server --host 0.0.0.0 --port 8083
+```
+
+### Изменение модели
+1. Откройте `http://127.0.0.1:8082/admin`
+2. Выберите другую модель
+3. Сохраните настройки
+
+## 📱 Использование на Android
+
+### В Termux
+```bash
 # Запуск в фоне
 nohup ~/start_fcc_server.sh > server.log 2>&1 &
 
 # Проверка логов
 tail -f server.log
-
-# Остановка сервера
-pkill fcc-server
 ```
 
-## 🆘 Проблемы?
+### В браузере на Android
+1. Откройте Chrome/Firefox
+2. Перейдите на `http://127.0.0.1:8082/admin`
+3. Настройте и используйте
 
-### Установщик не работает?
+## 🆘 Решение проблем
+
+### Установщик не запускается
 ```bash
-chmod +x termux_installer.sh
-bash termux_installer.sh
+chmod +x install.sh
+bash install.sh
 ```
 
-### Сервер не запускается?
+### Ошибки с Python
 ```bash
-# Проверьте порт
+pkg install -y python python-dev
+```
+
+### Нет интернет-соединения
+```bash
+# Проверьте соединение
+ping google.com
+
+# Перезапустите Termux
+# Настройки → Termux → Очистить кэш
+```
+
+### Сервер не запускается
+```bash
+# Проверьте установку
+bash ~/free-claude-code-termux/scripts/check_install.sh
+
+# Проверьте логи
+cat ~/.config/fcc/logs/server.log
+```
+
+### Порт занят
+```bash
+# Найдите процесс
 netstat -tuln | grep 8082
 
-# Остановите если занят
-lsof -ti:8082 | xargs kill -9
+# Убейте процесс
+pkill fcc-server
+
+# Используйте другой порт
+fcc-server --port 8083
 ```
 
-### Проверьте систему
-```bash
-bash check_install.sh
-```
+## 📚 Дополнительная документация
 
-## 📖 Полная документация
-
-Смотрите `INSTALLATION_GUIDE.md` для подробных инструкций.
-
-## ✅ Что установится?
-
-- Python 3.14
-- uv package manager
-- Claude Code CLI
-- Free Claude Code proxy
-- Все зависимости
+- [Руководство по установке](INSTALLATION_GUIDE.md) - Полное руководство
+- [Termux документация](TERMUX_README.md) - Подробная документация
+- [Обзор пакета](PACKAGE_OVERVIEW.md) - Описание пакета
+- [Распространение](DISTRIBUTION.md) - Инструкции по распространению
 
 ## 🎉 Готово!
 
-После установки у вас будет полностью рабочий Free Claude Code на Android!
+Теперь вы можете использовать Free Claude Code на Android!
+
+### Что дальше?
+
+1. 📖 Изучите [документацию](docs/)
+2. 🎨 Настройте под свои нужды
+3. 🚀 Начните кодить с Claude Code
+4. 📢 Поделитесь с друзьями
+
+## 💡 Советы
+
+- Используйте `nohup` для запуска в фоне
+- Настройте автозапуск при необходимости
+- Используйте `tmux` для нескольких сессий
+- Регулярно проверяйте обновления
+
+## 📞 Поддержка
+
+- GitHub: https://github.com/Alishahryar1/free-claude-code-termux
+- Issues: https://github.com/Alishahryar1/free-claude-code-termux/issues
 
 ---
 
-**Время установки**: 5-15 минут
-**Требуемая память**: ~2 ГБ
-**Интернет**: нужен для установки и работы
+**Удачи с Free Claude Code на Android!** 🚀

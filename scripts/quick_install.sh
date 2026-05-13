@@ -1,53 +1,64 @@
-#!/data/data/com.termux/files/usr/bin/bash
-
-#############################################
-# Free Claude Code - Quick Installer
-# Быстрая установка в одну команду
-#############################################
+#!/usr/bin/env bash
+#
+# Free Claude Code - Quick Termux Installer
+# Быстрый установщик Free Claude Code для Android (Termux)
+# Версия: 1.0.0
+#
 
 set -e
 
-echo "🚀 Free Claude Code - Быстрая установка"
-echo "========================================"
+# Цвета для вывода
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+echo -e "${CYAN}🚀 Free Claude Code - Quick Installer${NC}"
 echo ""
 
-# Обновление и установка базовых пакетов
-pkg update && pkg upgrade -y && \
-pkg install -y git python python-pip curl wget nodejs make clang && \
+# Обновление и установка
+echo -e "${YELLOW}📦 Установка зависимостей...${NC}"
+pkg update -y
+pkg install -y python python-dev git curl
 
 # Установка uv
-curl -LsSf https://astral.sh/uv/install.sh | sh && \
-
-# Настройка PATH
-export PATH="$HOME/.local/bin:$PATH" && \
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && \
-
-# Установка Python 3.14
-uv python install 3.14 && \
-
-# Установка Claude Code
-npm install -g @anthropic-ai/claude-code && \
+echo -e "${YELLOW}📦 Установка uv...${NC}"
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
 
 # Установка Free Claude Code
-uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git && \
+echo -e "${YELLOW}📦 Установка Free Claude Code...${NC}"
+uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git
 
 # Создание скриптов запуска
-cat > ~/start_fcc.sh << 'EOF'
-#!/data/data/com.termux/files/usr/bin/bash
-export PATH="$HOME/.local/bin:$PATH"
-fcc-server
+echo -e "${YELLOW}📦 Создание скриптов запуска...${NC}"
+
+cat > ~/start_fcc_server.sh << 'EOF'
+#!/usr/bin/env bash
+fcc-server --host 0.0.0.0 --port 8082
 EOF
-chmod +x ~/start_fcc.sh && \
+chmod +x ~/start_fcc_server.sh
+
+cat > ~/start_fcc_claude.sh << 'EOF'
+#!/usr/bin/env bash
+fcc
+EOF
+chmod +x ~/start_fcc_claude.sh
+
+# Настройка окружения
+if ! grep -q "uv" ~/.bashrc; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+fi
+
+mkdir -p ~/.config/fcc
 
 echo ""
-echo "✅ Установка завершена!"
+echo -e "${GREEN}✅ Установка завершена!${NC}"
 echo ""
-echo "🚀 Для запуска:"
-echo "   ~/start_fcc.sh"
+echo -e "${CYAN}Запуск:${NC}"
+echo -e "  ${GREEN}~/start_fcc_server.sh${NC}"
+echo -e "  ${GREEN}~/start_fcc_claude.sh${NC}"
 echo ""
-echo "⚙️  После запуска откройте:"
-echo "   http://127.0.0.1:8082/admin"
-echo ""
-echo "📝 Для просмотра инструкций:"
-echo "   cat ~/FCC_INSTRUCTIONS.txt"
+echo -e "${CYAN}Настройка:${NC}"
+echo -e "  ${GREEN}http://127.0.0.1:8082/admin${NC}"
 echo ""

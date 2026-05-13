@@ -1,231 +1,326 @@
-# Free Claude Code - Конфигурация
-# Примеры конфигурационных файлов
+# ============================================
+# Free Claude Code - Configuration Examples
+# Примеры конфигураций для разных провайдеров API
+# Версия: 1.0.0
+# ============================================
 
-#############################################
-# config.yaml - Основная конфигурация
-#############################################
+# ============================================
+# OpenRouter Configuration
+# ============================================
+openrouter_config:
+  api:
+    provider: "openrouter"
+    api_key: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://openrouter.ai/api/v1"
 
-# Серверные настройки
-server:
-  host: "0.0.0.0"
-  port: 8082
-  debug: false
-  workers: 1
+  model:
+    name: "anthropic/claude-3.5-sonnet"
+    temperature: 0.7
+    max_tokens: 4096
 
-# API настройки
-api:
-  # Провайдер по умолчанию
-  default_provider: "openrouter"
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
 
-  # Таймауты
-  timeout: 60
-  max_retries: 3
+# ============================================
+# DeepSeek Configuration
+# ============================================
+deepseek_config:
+  api:
+    provider: "deepseek"
+    api_key: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://api.deepseek.com/v1"
 
-  # Настройки для разных провайдеров
-  providers:
-    openrouter:
-      base_url: "https://openrouter.ai/api/v1"
-      models:
-        default: "anthropic/claude-3.5-sonnet"
-        fallback: "anthropic/claude-3-haiku"
+  model:
+    name: "deepseek-chat"
+    temperature: 0.7
+    max_tokens: 4096
 
-    deepseek:
-      base_url: "https://api.deepseek.com/v1"
-      models:
-        default: "deepseek-chat"
-        fallback: "deepseek-coder"
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
 
-    nvidia:
-      base_url: "https://integrate.api.nvidia.com/v1"
-      models:
-        default: "meta/llama-3.1-405b-instruct"
-        fallback: "meta/llama-3.1-70b-instruct"
+# ============================================
+# NVIDIA NIM Configuration
+# ============================================
+nvidia_config:
+  api:
+    provider: "nvidia"
+    api_key: "nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://integrate.api.nvidia.com/v1"
 
-# Кэширование
-cache:
-  enabled: true
-  ttl: 3600  # 1 час
-  max_size: 100  # МБ
+  model:
+    name: "meta/llama-3.1-405b-instruct"
+    temperature: 0.7
+    max_tokens: 4096
 
-# Логирование
-logging:
-  level: "INFO"
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  file: "~/.config/fcc/logs/server.log"
-  max_size: 10485760  # 10 МБ
-  backup_count: 5
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
 
-# Безопасность
-security:
-  api_key_required: true
+# ============================================
+# Kimi Configuration
+# ============================================
+kimi_config:
+  api:
+    provider: "kimi"
+    api_key: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://api.moonshot.cn/v1"
+
+  model:
+    name: "moonshot-v1-128k"
+    temperature: 0.7
+    max_tokens: 4096
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+
+# ============================================
+# Wafer Configuration
+# ============================================
+wafer_config:
+  api:
+    provider: "wafer"
+    api_key: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://api.wafer.ai/v1"
+
+  model:
+    name: "wafer-7b"
+    temperature: 0.7
+    max_tokens: 4096
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+
+# ============================================
+# LM Studio Configuration (Local)
+# ============================================
+lmstudio_config:
+  api:
+    provider: "lmstudio"
+    api_key: ""
+    base_url: "http://localhost:1234/v1"
+
+  model:
+    name: "local-model"
+    temperature: 0.7
+    max_tokens: 4096
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+
+# ============================================
+# Ollama Configuration (Local)
+# ============================================
+ollama_config:
+  api:
+    provider: "ollama"
+    api_key: ""
+    base_url: "http://localhost:11434/v1"
+
+  model:
+    name: "llama3"
+    temperature: 0.7
+    max_tokens: 4096
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+
+# ============================================
+# Advanced Configuration
+# ============================================
+advanced_config:
+  api:
+    provider: "openrouter"
+    api_key: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://openrouter.ai/api/v1"
+    timeout: 300
+    retry_attempts: 3
+    retry_delay: 5
+
+  model:
+    name: "anthropic/claude-3.5-sonnet"
+    temperature: 0.7
+    max_tokens: 4096
+    top_p: 0.9
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+    workers: 4
+
+  cache:
+    enabled: true
+    ttl: 3600
+    max_size: 1000
+
   rate_limit:
     enabled: true
     requests_per_minute: 60
+    burst_size: 10
+
   cors:
     enabled: true
-    origins: ["*"]
+    origins:
+      - "*"
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    headers:
+      - Content-Type
+      - Authorization
 
-# Клиентские настройки
-client:
-  timeout: 30
-  max_tokens: 4096
-  temperature: 0.7
-  stream: true
+  logging:
+    level: "INFO"
+    file: "/data/data/com.termux/files/home/.config/fcc/logs/server.log"
+    max_size: "10MB"
+    backup_count: 5
 
-#############################################
-# models.json - Доступные модели
-#############################################
+  security:
+    auth_enabled: false
+    admin_password: ""
+    allowed_ips: []
+    rate_limit_by_ip: true
 
-{
-  "providers": {
-    "openrouter": {
-      "name": "OpenRouter",
-      "models": [
-        {
-          "id": "anthropic/claude-3.5-sonnet",
-          "name": "Claude 3.5 Sonnet",
-          "context": "200k",
-          "pricing": "$3/1M input, $15/1M output"
-        },
-        {
-          "id": "anthropic/claude-3-opus",
-          "name": "Claude 3 Opus",
-          "context": "200k",
-          "pricing": "$15/1M input, $75/1M output"
-        },
-        {
-          "id": "anthropic/claude-3-haiku",
-          "name": "Claude 3 Haiku",
-          "context": "200k",
-          "pricing": "$0.25/1M input, $1.25/1M output"
-        }
-      ]
-    },
-    "deepseek": {
-      "name": "DeepSeek",
-      "models": [
-        {
-          "id": "deepseek-chat",
-          "name": "DeepSeek Chat",
-          "context": "128k",
-          "pricing": "$0.14/1M input, $0.28/1M output"
-        },
-        {
-          "id": "deepseek-coder",
-          "name": "DeepSeek Coder",
-          "context": "128k",
-          "pricing": "$0.14/1M input, $0.28/1M output"
-        }
-      ]
-    },
-    "nvidia": {
-      "name": "NVIDIA NIM",
-      "models": [
-        {
-          "id": "meta/llama-3.1-405b-instruct",
-          "name": "Llama 3.1 405B",
-          "context": "128k",
-          "pricing": "Free tier available"
-        },
-        {
-          "id": "meta/llama-3.1-70b-instruct",
-          "name": "Llama 3.1 70B",
-          "context": "128k",
-          "pricing": "Free tier available"
-        }
-      ]
-    }
-  }
-}
+  performance:
+    max_concurrent_requests: 10
+    request_timeout: 300
+    keepalive_timeout: 75
+    max_body_size: "10MB"
 
-#############################################
-# .env.example - Пример переменных окружения
-#############################################
+# ============================================
+# Development Configuration
+# ============================================
+development_config:
+  api:
+    provider: "openrouter"
+    api_key: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://openrouter.ai/api/v1"
 
-# API ключи (замените на свои)
-OPENROUTER_API_KEY=your-openrouter-api-key-here
-DEEPSEEK_API_KEY=your-deepseek-api-key-here
-NVIDIA_API_KEY=your-nvidia-api-key-here
-KIMI_API_KEY=your-kimi-api-key-here
-WAFER_API_KEY=your-wafer-api-key-here
+  model:
+    name: "anthropic/claude-3.5-sonnet"
+    temperature: 0.7
+    max_tokens: 4096
 
-# Серверные настройки
-FCC_HOST=0.0.0.0
-FCC_PORT=8082
-FCC_DEBUG=false
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: true
+    reload: true
 
-# Логирование
-FCC_LOG_LEVEL=INFO
-FCC_LOG_TO_FILE=true
-FCC_LOG_TO_CONSOLE=true
+  cache:
+    enabled: false
 
-# Кэширование
-FCC_ENABLE_CACHE=true
-FCC_CACHE_SIZE=100
-FCC_CACHE_TTL=3600
+  rate_limit:
+    enabled: false
 
-# Безопасность
-FCC_API_KEY_REQUIRED=true
-FCC_RATE_LIMIT_ENABLED=true
-FCC_RATE_LIMIT_RPM=60
+  logging:
+    level: "DEBUG"
 
-# Клиентские настройки
-FCC_DEFAULT_MODEL=anthropic/claude-3.5-sonnet
-FCC_MAX_TOKENS=4096
-FCC_TEMPERATURE=0.7
-FCC_STREAM=true
+# ============================================
+# Production Configuration
+# ============================================
+production_config:
+  api:
+    provider: "openrouter"
+    api_key: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    base_url: "https://openrouter.ai/api/v1"
+    timeout: 300
+    retry_attempts: 3
 
-#############################################
-# admin_config.json - Конфигурация админ-панели
-#############################################
+  model:
+    name: "anthropic/claude-3.5-sonnet"
+    temperature: 0.7
+    max_tokens: 4096
 
-{
-  "admin": {
-    "enabled": true,
-    "username": "admin",
-    "password": "change-me-please",
-    "secret_key": "change-this-to-random-string"
-  },
-  "ui": {
-    "theme": "dark",
-    "language": "ru",
-    "auto_refresh": true,
-    "refresh_interval": 5
-  },
-  "features": {
-    "api_key_management": true,
-    "model_selection": true,
-    "usage_statistics": true,
-    "log_viewer": true
-  }
-}
+  server:
+    host: "0.0.0.0"
+    port: 8082
+    debug: false
+    workers: 8
 
-#############################################
-# Инструкции по использованию
-#############################################
+  cache:
+    enabled: true
+    ttl: 3600
+    max_size: 10000
 
-# 1. Скопируйте примеры конфигураций:
-cp config.yaml.example ~/.config/fcc/config.yaml
-cp .env.example ~/.config/fcc/.env
-cp admin_config.json.example ~/.config/fcc/admin_config.json
+  rate_limit:
+    enabled: true
+    requests_per_minute: 120
+    burst_size: 20
 
-# 2. Отредактируйте конфигурации:
-nano ~/.config/fcc/config.yaml
-nano ~/.config/fcc/.env
+  cors:
+    enabled: true
+    origins:
+      - "https://yourdomain.com"
+    methods:
+      - GET
+      - POST
+    headers:
+      - Content-Type
+      - Authorization
 
-# 3. Перезапустите сервер:
-pkill fcc-server
-~/start_fcc_server.sh
+  logging:
+    level: "WARNING"
+    file: "/data/data/com.termux/files/home/.config/fcc/logs/server.log"
+    max_size: "100MB"
+    backup_count: 10
 
-# 4. Откройте админ-панель:
-# http://127.0.0.1:8082/admin
+  security:
+    auth_enabled: true
+    admin_password: "your-secure-password"
+    allowed_ips: []
+    rate_limit_by_ip: true
 
-#############################################
-# Примечания
-#############################################
+  performance:
+    max_concurrent_requests: 50
+    request_timeout: 300
+    keepalive_timeout: 75
+    max_body_size: "50MB"
 
-# - Все конфигурационные файлы должны быть в ~/.config/fcc/
-# - API ключи должны храниться только в .env файле
-# - Не коммитьте .env файл в git
-# - Используйте сложные пароли для админ-панели
-# - Регулярно обновляйте конфигурации
+# ============================================
+# Minimal Configuration
+# ============================================
+minimal_config:
+  api:
+    provider: "openrouter"
+    api_key: "your-api-key"
+
+  model:
+    name: "anthropic/claude-3.5-sonnet"
+
+  server:
+    host: "0.0.0.0"
+    port: 8082
+
+# ============================================
+# Notes
+# ============================================
+#
+# 1. Замените "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" на ваш реальный API ключ
+# 2. Для локальных провайдеров (LM Studio, Ollama) API ключ не требуется
+# 3. Порты можно изменить при необходимости
+# 4. В production режиме обязательно включите аутентификацию
+# 5. Настройте CORS origins для безопасности в production
+# 6. Используйте development_config для отладки
+# 7. Используйте production_config для боевого использования
+# 8. minimal_config содержит только необходимые настройки
+#
+# ============================================

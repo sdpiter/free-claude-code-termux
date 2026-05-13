@@ -1,313 +1,302 @@
-#!/data/data/com.termux/files/usr/bin/bash
-
-#############################################
+#!/usr/bin/env bash
+#
 # Free Claude Code - Termux Installer
-# Автоматический установщик для Android
-#############################################
+# Автоматический установщик Free Claude Code для Android (Termux)
+# Версия: 1.0.0
+#
 
-set -e  # Остановиться при ошибке
+set -e
 
 # Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Функции для вывода
-print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+print_header() {
+    echo -e "${CYAN}"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║                                                            ║"
+    echo "║   🚀 Free Claude Code - Termux Installer                  ║"
+    echo "║                                                            ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
 }
 
 print_success() {
     echo -e "${GREEN}✅ $1${NC}"
 }
 
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
 print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-print_header() {
-    echo -e "${GREEN}"
-    echo "========================================"
-    echo "  Free Claude Code - Termux Installer"
-    echo "========================================"
-    echo -e "${NC}"
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
-# Проверка root прав
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+print_step() {
+    echo -e "${CYAN}📋 $1${NC}"
+}
+
+# Проверка прав root
 check_root() {
-    if [ "$EUID" -eq 0 ]; then
-        print_warning "Запуск от root не рекомендуется"
+    print_step "Проверка прав доступа..."
+    if [ "$(id -u)" = "0" ]; then
+        print_error "Не запускайте этот скрипт от root!"
+        exit 1
     fi
+    print_success "Права доступа в порядке"
 }
 
 # Проверка интернет-соединения
 check_internet() {
-    print_info "Проверка интернет-соединения..."
-    if ping -c 1 google.com &> /dev/null; then
-        print_success "Интернет доступен"
-    else
+    print_step "Проверка интернет-соединения..."
+    if ! ping -c 1 -W 5 google.com &> /dev/null; then
         print_error "Нет интернет-соединения!"
         exit 1
     fi
+    print_success "Интернет-соединение есть"
 }
 
-# Обновление системы
-update_system() {
-    print_info "Обновление пакетов Termux..."
-    pkg update && pkg upgrade -y
-    print_success "Система обновлена"
+# Проверка свободного места
+check_disk_space() {
+    print_step "Проверка свободного места..."
+    local free_space=$(df -m . | tail -1 | awk '{print $4}')
+    if [ "$free_space" -lt 2048 ]; then
+        print_error "Недостаточно свободного места! Нужно минимум 2 ГБ"
+        exit 1
+    fi
+    print_success "Свободного места: ${free_space} МБ"
 }
 
-# Установка базовых пакетов
-install_base_packages() {
-    print_info "Установка базовых пакетов..."
-    pkg install -y git python python-pip curl wget nodejs make clang openssl libffi
-    print_success "Базовые пакеты установлены"
+# Проверка версии Android
+check_android_version() {
+    print_step "Проверка версии Android..."
+    local android_version=$(getprop ro.build.version.release)
+    local major_version=$(echo $android_version | cut -d. -f1)
+
+    if [ "$major_version" -lt 5 ]; then
+        print_error "Требуется Android 5.0 или выше!"
+        exit 1
+    fi
+    print_success "Версия Android: $android_version"
+}
+
+# Обновление пакетов Termux
+update_packages() {
+    print_step "Обновление пакетов Termux..."
+    pkg update -y
+    pkg upgrade -y
+    print_success "Пакеты обновлены"
+}
+
+# Установка зависимостей
+install_dependencies() {
+    print_step "Установка зависимостей..."
+    pkg install -y python python-dev git curl wget unzip tar
+    print_success "Зависимости установлены"
 }
 
 # Установка uv
 install_uv() {
-    print_info "Установка uv (Python package manager)..."
+    print_step "Установка uv (Python package manager)..."
 
     if command -v uv &> /dev/null; then
-        print_success "uv уже установлен"
-    else
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        print_success "uv установлен"
+        print_info "uv уже установлен"
+        return
     fi
 
-    # Добавление uv в PATH
-    if ! grep -q "uv" ~/.bashrc; then
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-        print_success "uv добавлен в PATH"
-    fi
-
+    curl -LsSf https://astral.sh/uv/install.sh | sh
     export PATH="$HOME/.local/bin:$PATH"
-}
 
-# Установка Python 3.14
-install_python() {
-    print_info "Установка Python 3.14..."
-
-    if command -v uv &> /dev/null; then
-        uv python install 3.14
-        print_success "Python 3.14 установлен"
-    else
-        print_error "uv не установлен!"
+    if ! command -v uv &> /dev/null; then
+        print_error "Не удалось установить uv"
         exit 1
     fi
-}
 
-# Установка Claude Code CLI
-install_claude_code() {
-    print_info "Установка Claude Code CLI..."
-
-    if command -v claude &> /dev/null; then
-        print_success "Claude Code уже установлен"
-    else
-        npm install -g @anthropic-ai/claude-code
-        print_success "Claude Code установлен"
-    fi
+    print_success "uv установлен"
 }
 
 # Установка Free Claude Code
 install_free_claude_code() {
-    print_info "Установка Free Claude Code proxy..."
+    print_step "Установка Free Claude Code..."
 
     if command -v fcc-server &> /dev/null; then
-        print_warning "Free Claude Code уже установлен"
-        read -p "Переустановить? (y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git
-            print_success "Free Claude Code переустановлен"
-        fi
-    else
-        uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git
-        print_success "Free Claude Code установлен"
+        print_info "Free Claude Code уже установлен"
+        return
     fi
+
+    uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git
+
+    if ! command -v fcc-server &> /dev/null; then
+        print_error "Не удалось установить Free Claude Code"
+        exit 1
+    fi
+
+    print_success "Free Claude Code установлен"
 }
 
-# Создание директории для конфигурации
-setup_config_dir() {
-    print_info "Создание директории для конфигурации..."
-    mkdir -p ~/.config/fcc
-    print_success "Директория создана"
-}
-
-# Создание скрипта быстрого запуска
-create_start_scripts() {
-    print_info "Создание скриптов запуска..."
+# Создание скриптов запуска
+create_startup_scripts() {
+    print_step "Создание скриптов запуска..."
 
     # Скрипт запуска сервера
     cat > ~/start_fcc_server.sh << 'EOF'
-#!/data/data/com.termux/files/usr/bin/bash
-export PATH="$HOME/.local/bin:$PATH"
-echo "🚀 Запуск Free Claude Code сервера..."
-fcc-server
+#!/usr/bin/env bash
+# Free Claude Code Server Launcher
+
+echo "🚀 Запуск Free Claude Code Server..."
+fcc-server --host 0.0.0.0 --port 8082
 EOF
+
     chmod +x ~/start_fcc_server.sh
 
     # Скрипт запуска Claude Code
     cat > ~/start_fcc_claude.sh << 'EOF'
-#!/data/data/com.termux/files/usr/bin/bash
-export PATH="$HOME/.local/bin:$PATH"
-echo "🤖 Запуск Claude Code..."
-fcc-claude
+#!/usr/bin/env bash
+# Free Claude Code CLI Launcher
+
+echo "🤖 Запуск Free Claude Code CLI..."
+fcc
 EOF
+
     chmod +x ~/start_fcc_claude.sh
 
     print_success "Скрипты запуска созданы"
 }
 
-# Создание файла с инструкциями
-create_instructions() {
-    print_info "Создание файла с инструкциями..."
+# Настройка окружения
+setup_environment() {
+    print_step "Настройка окружения..."
 
-    cat > ~/FCC_INSTRUCTIONS.txt << 'EOF'
-========================================
-Free Claude Code - Инструкции
-========================================
+    # Добавление uv в PATH
+    if ! grep -q "uv" ~/.bashrc; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    fi
 
-🚀 БЫСТРЫЙ ЗАПУСК:
+    # Создание папки для конфигураций
+    mkdir -p ~/.config/fcc
 
-1. Запуск сервера:
-   ~/start_fcc_server.sh
-
-2. В другом терминале запуск Claude Code:
-   ~/start_fcc_claude.sh
-
-⚙️ НАСТРОЙКА:
-
-1. После запуска сервера откройте в браузере:
-   http://127.0.0.1:8082/admin
-
-2. Вставьте ваш API ключ от одного из провайдеров:
-   - NVIDIA NIM: https://build.nvidia.com/
-   - Kimi: https://platform.moonshot.cn/
-   - Wafer: https://wafer.ai/
-   - OpenRouter: https://openrouter.ai/
-   - DeepSeek: https://platform.deepseek.com/
-   - LM Studio: https://lmstudio.ai/ (локальный)
-   - Ollama: https://ollama.ai/ (локальный)
-
-3. Выберите модель и сохраните настройки
-
-📱 ПОЛЕЗНЫЕ КОМАНДЫ:
-
-- Обновление: pkg update && pkg upgrade
-- Проверка установки: fcc-server --help
-- Очистка кэша: pkg clean
-
-🆘 РЕШЕНИЕ ПРОБЛЕМ:
-
-Если сервер не запускается:
-1. Проверьте, что порт 8082 свободен
-2. Перезапустите Termux
-3. Проверьте интернет-соединение
-
-Если возникают ошибки с Python:
-pkg install -y python-dev
-
-Если uv не работает:
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-📞 ПОДДЕРЖКА:
-GitHub: https://github.com/Alishahryar1/free-claude-code
-EOF
-
-    print_success "Инструкции созданы: ~/FCC_INSTRUCTIONS.txt"
+    print_success "Окружение настроено"
 }
 
-# Проверка установки
-verify_installation() {
-    print_info "Проверка установки..."
+# Создание конфигурации по умолчанию
+create_default_config() {
+    print_step "Создание конфигурации по умолчанию..."
 
-    local all_good=true
+    cat > ~/.config/fcc/config.yaml << 'EOF'
+# Free Claude Code Configuration
 
-    if command -v uv &> /dev/null; then
-        print_success "uv установлен: $(uv --version)"
-    else
-        print_error "uv не установлен"
-        all_good=false
-    fi
+# API Settings
+api:
+  # API Provider: openrouter, deepseek, nvidia, kimi, wafer, lmstudio, ollama
+  provider: openrouter
+  api_key: ""
+  base_url: ""
 
-    if command -v python3.14 &> /dev/null; then
-        print_success "Python 3.14 установлен"
-    else
-        print_error "Python 3.14 не установлен"
-        all_good=false
-    fi
+# Model Settings
+model:
+  name: "anthropic/claude-3.5-sonnet"
+  temperature: 0.7
+  max_tokens: 4096
 
-    if command -v claude &> /dev/null; then
-        print_success "Claude Code установлен"
-    else
-        print_error "Claude Code не установлен"
-        all_good=false
-    fi
+# Server Settings
+server:
+  host: "0.0.0.0"
+  port: 8082
+  debug: false
 
-    if command -v fcc-server &> /dev/null; then
-        print_success "Free Claude Code установлен"
-    else
-        print_error "Free Claude Code не установлен"
-        all_good=false
-    fi
+# Cache Settings
+cache:
+  enabled: true
+  ttl: 3600
 
-    if [ "$all_good" = true ]; then
-        return 0
-    else
-        return 1
-    fi
+# Rate Limiting
+rate_limit:
+  enabled: true
+  requests_per_minute: 60
+
+# CORS
+cors:
+  enabled: true
+  origins: ["*"]
+EOF
+
+    print_success "Конфигурация создана"
+}
+
+# Отображение инструкций
+show_instructions() {
+    echo ""
+    echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗"
+    echo "║                  🎉 Установка завершена!                            ║"
+    echo "╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}📋 Следующие шаги:${NC}"
+    echo ""
+    echo -e "1. ${YELLOW}Запустите сервер:${NC}"
+    echo -e "   ${GREEN}~/start_fcc_server.sh${NC}"
+    echo ""
+    echo -e "2. ${YELLOW}В новом терминале запустите Claude Code:${NC}"
+    echo -e "   ${GREEN}~/start_fcc_claude.sh${NC}"
+    echo ""
+    echo -e "3. ${YELLOW}Откройте в браузере:${NC}"
+    echo -e "   ${GREEN}http://127.0.0.1:8082/admin${NC}"
+    echo ""
+    echo -e "4. ${YELLOW}Вставьте ваш API ключ и выберите модель${NC}"
+    echo ""
+    echo -e "${CYAN}📚 Где взять API ключ:${NC}"
+    echo ""
+    echo -e "• ${GREEN}DeepSeek${NC} - https://platform.deepseek.com/ (бесплатно)"
+    echo -e "• ${GREEN}NVIDIA NIM${NC} - https://build.nvidia.com/ (бесплатно)"
+    echo -e "• ${GREEN}OpenRouter${NC} - https://openrouter.ai/ (доступно)"
+    echo ""
+    echo -e "${CYAN}🔧 Полезные команды:${NC}"
+    echo ""
+    echo -e "• ${GREEN}~/start_fcc_server.sh${NC} - запуск сервера"
+    echo -e "• ${GREEN}~/start_fcc_claude.sh${NC} - запуск Claude Code"
+    echo -e "• ${GREEN}pkill fcc-server${NC} - остановка сервера"
+    echo ""
+    echo -e "${CYAN}📖 Документация:${NC}"
+    echo -e "   https://github.com/Alishahryar1/free-claude-code-termux"
+    echo ""
 }
 
 # Главная функция
 main() {
     print_header
 
-    print_info "Начинаю установку Free Claude Code..."
-    echo ""
-
+    # Проверки
     check_root
     check_internet
-    update_system
-    install_base_packages
-    install_uv
-    install_python
-    install_claude_code
-    install_free_claude_code
-    setup_config_dir
-    create_start_scripts
-    create_instructions
+    check_disk_space
+    check_android_version
 
     echo ""
-    print_info "Проверка установки..."
-    if verify_installation; then
-        echo ""
-        print_success "========================================"
-        print_success "Установка успешно завершена!"
-        print_success "========================================"
-        echo ""
-        print_info "Для запуска используйте:"
-        print_info "  ~/start_fcc_server.sh"
-        echo ""
-        print_info "Для просмотра инструкций:"
-        print_info "  cat ~/FCC_INSTRUCTIONS.txt"
-        echo ""
-        print_warning "После запуска сервера откройте:"
-        print_warning "http://127.0.0.1:8082/admin"
-        echo ""
-    else
-        echo ""
-        print_error "Установка завершена с ошибками!"
-        print_error "Проверьте сообщения выше и попробуйте снова."
-        exit 1
-    fi
+    print_info "Начинаем установку..."
+    echo ""
+
+    # Установка
+    update_packages
+    install_dependencies
+    install_uv
+    install_free_claude_code
+    create_startup_scripts
+    setup_environment
+    create_default_config
+
+    echo ""
+    show_instructions
+
+    print_success "Установка успешно завершена!"
 }
 
 # Запуск
