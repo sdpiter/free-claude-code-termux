@@ -23,7 +23,13 @@ pkg install -y python git curl
 
 # Установка uv
 echo -e "${YELLOW}📦 Установка uv...${NC}"
-curl -LsSf https://astral.sh/uv/install.sh | sh
+if [ -n "$TERMUX_VERSION" ]; then
+    echo -e "${CYAN}Обнаружен Termux, устанавливаем через pip...${NC}"
+    pip install --upgrade pip
+    pip install uv
+else
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
 export PATH="$HOME/.local/bin:$PATH"
 
 # Установка Free Claude Code

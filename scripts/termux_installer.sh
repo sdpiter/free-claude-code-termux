@@ -114,7 +114,16 @@ install_uv() {
         return
     fi
 
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    # Проверяем, работаем ли в Termux
+    if [ -n "$TERMUX_VERSION" ]; then
+        print_info "Обнаружен Termux, устанавливаем uv через pip..."
+        pip install --upgrade pip
+        pip install uv
+    else
+        # Стандартная установка для Linux/Mac
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    fi
+
     export PATH="$HOME/.local/bin:$PATH"
 
     if ! command -v uv &> /dev/null; then
