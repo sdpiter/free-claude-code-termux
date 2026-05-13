@@ -19,7 +19,7 @@ echo ""
 # Обновление и установка
 echo -e "${YELLOW}📦 Установка зависимостей...${NC}"
 pkg update -y
-pkg install -y python python-dev git curl
+pkg install -y python git curl
 
 # Установка uv
 echo -e "${YELLOW}📦 Установка uv...${NC}"

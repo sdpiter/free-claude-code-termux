@@ -101,7 +101,7 @@ update_packages() {
 # Установка зависимостей
 install_dependencies() {
     print_step "Установка зависимостей..."
-    pkg install -y python python-dev git curl wget unzip tar
+    pkg install -y python git curl wget unzip tar
     print_success "Зависимости установлены"
 }
 
