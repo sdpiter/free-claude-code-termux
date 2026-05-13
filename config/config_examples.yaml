@@ -1,0 +1,231 @@
+# Free Claude Code - Конфигурация
+# Примеры конфигурационных файлов
+
+#############################################
+# config.yaml - Основная конфигурация
+#############################################
+
+# Серверные настройки
+server:
+  host: "0.0.0.0"
+  port: 8082
+  debug: false
+  workers: 1
+
+# API настройки
+api:
+  # Провайдер по умолчанию
+  default_provider: "openrouter"
+
+  # Таймауты
+  timeout: 60
+  max_retries: 3
+
+  # Настройки для разных провайдеров
+  providers:
+    openrouter:
+      base_url: "https://openrouter.ai/api/v1"
+      models:
+        default: "anthropic/claude-3.5-sonnet"
+        fallback: "anthropic/claude-3-haiku"
+
+    deepseek:
+      base_url: "https://api.deepseek.com/v1"
+      models:
+        default: "deepseek-chat"
+        fallback: "deepseek-coder"
+
+    nvidia:
+      base_url: "https://integrate.api.nvidia.com/v1"
+      models:
+        default: "meta/llama-3.1-405b-instruct"
+        fallback: "meta/llama-3.1-70b-instruct"
+
+# Кэширование
+cache:
+  enabled: true
+  ttl: 3600  # 1 час
+  max_size: 100  # МБ
+
+# Логирование
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "~/.config/fcc/logs/server.log"
+  max_size: 10485760  # 10 МБ
+  backup_count: 5
+
+# Безопасность
+security:
+  api_key_required: true
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+  cors:
+    enabled: true
+    origins: ["*"]
+
+# Клиентские настройки
+client:
+  timeout: 30
+  max_tokens: 4096
+  temperature: 0.7
+  stream: true
+
+#############################################
+# models.json - Доступные модели
+#############################################
+
+{
+  "providers": {
+    "openrouter": {
+      "name": "OpenRouter",
+      "models": [
+        {
+          "id": "anthropic/claude-3.5-sonnet",
+          "name": "Claude 3.5 Sonnet",
+          "context": "200k",
+          "pricing": "$3/1M input, $15/1M output"
+        },
+        {
+          "id": "anthropic/claude-3-opus",
+          "name": "Claude 3 Opus",
+          "context": "200k",
+          "pricing": "$15/1M input, $75/1M output"
+        },
+        {
+          "id": "anthropic/claude-3-haiku",
+          "name": "Claude 3 Haiku",
+          "context": "200k",
+          "pricing": "$0.25/1M input, $1.25/1M output"
+        }
+      ]
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "models": [
+        {
+          "id": "deepseek-chat",
+          "name": "DeepSeek Chat",
+          "context": "128k",
+          "pricing": "$0.14/1M input, $0.28/1M output"
+        },
+        {
+          "id": "deepseek-coder",
+          "name": "DeepSeek Coder",
+          "context": "128k",
+          "pricing": "$0.14/1M input, $0.28/1M output"
+        }
+      ]
+    },
+    "nvidia": {
+      "name": "NVIDIA NIM",
+      "models": [
+        {
+          "id": "meta/llama-3.1-405b-instruct",
+          "name": "Llama 3.1 405B",
+          "context": "128k",
+          "pricing": "Free tier available"
+        },
+        {
+          "id": "meta/llama-3.1-70b-instruct",
+          "name": "Llama 3.1 70B",
+          "context": "128k",
+          "pricing": "Free tier available"
+        }
+      ]
+    }
+  }
+}
+
+#############################################
+# .env.example - Пример переменных окружения
+#############################################
+
+# API ключи (замените на свои)
+OPENROUTER_API_KEY=your-openrouter-api-key-here
+DEEPSEEK_API_KEY=your-deepseek-api-key-here
+NVIDIA_API_KEY=your-nvidia-api-key-here
+KIMI_API_KEY=your-kimi-api-key-here
+WAFER_API_KEY=your-wafer-api-key-here
+
+# Серверные настройки
+FCC_HOST=0.0.0.0
+FCC_PORT=8082
+FCC_DEBUG=false
+
+# Логирование
+FCC_LOG_LEVEL=INFO
+FCC_LOG_TO_FILE=true
+FCC_LOG_TO_CONSOLE=true
+
+# Кэширование
+FCC_ENABLE_CACHE=true
+FCC_CACHE_SIZE=100
+FCC_CACHE_TTL=3600
+
+# Безопасность
+FCC_API_KEY_REQUIRED=true
+FCC_RATE_LIMIT_ENABLED=true
+FCC_RATE_LIMIT_RPM=60
+
+# Клиентские настройки
+FCC_DEFAULT_MODEL=anthropic/claude-3.5-sonnet
+FCC_MAX_TOKENS=4096
+FCC_TEMPERATURE=0.7
+FCC_STREAM=true
+
+#############################################
+# admin_config.json - Конфигурация админ-панели
+#############################################
+
+{
+  "admin": {
+    "enabled": true,
+    "username": "admin",
+    "password": "change-me-please",
+    "secret_key": "change-this-to-random-string"
+  },
+  "ui": {
+    "theme": "dark",
+    "language": "ru",
+    "auto_refresh": true,
+    "refresh_interval": 5
+  },
+  "features": {
+    "api_key_management": true,
+    "model_selection": true,
+    "usage_statistics": true,
+    "log_viewer": true
+  }
+}
+
+#############################################
+# Инструкции по использованию
+#############################################
+
+# 1. Скопируйте примеры конфигураций:
+cp config.yaml.example ~/.config/fcc/config.yaml
+cp .env.example ~/.config/fcc/.env
+cp admin_config.json.example ~/.config/fcc/admin_config.json
+
+# 2. Отредактируйте конфигурации:
+nano ~/.config/fcc/config.yaml
+nano ~/.config/fcc/.env
+
+# 3. Перезапустите сервер:
+pkill fcc-server
+~/start_fcc_server.sh
+
+# 4. Откройте админ-панель:
+# http://127.0.0.1:8082/admin
+
+#############################################
+# Примечания
+#############################################
+
+# - Все конфигурационные файлы должны быть в ~/.config/fcc/
+# - API ключи должны храниться только в .env файле
+# - Не коммитьте .env файл в git
+# - Используйте сложные пароли для админ-панели
+# - Регулярно обновляйте конфигурации

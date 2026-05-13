@@ -1,0 +1,76 @@
+# Free Claude Code - Termux Installer
+
+# Логи
+*.log
+logs/
+*.log.*
+
+# Временные файлы
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Операционные системы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Конфигурации с секретами
+.env
+.env.local
+.env.*.local
+config.yaml
+admin_config.json
+
+# Локальные настройки
+.local/
+.localrc
+
+# Termux специфичные
+.termux/
+.storage/
+
+# Резервные копии
+*.bak
+*.backup
+*~
+
+# Сжатые файлы
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Скриншоты
+screenshot_*.png
+screenshot_*.jpg
+
+# Тестовые файлы
+test_*.sh
+test_*.py
+*_test.*
+
+# Документация (если не нужна в репозитории)
+docs/*.pdf
+docs/*.docx
