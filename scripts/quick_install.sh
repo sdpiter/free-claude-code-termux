@@ -25,7 +25,6 @@ pkg install -y python git curl
 echo -e "${YELLOW}📦 Установка uv...${NC}"
 if [ -n "$TERMUX_VERSION" ]; then
     echo -e "${CYAN}Обнаружен Termux, устанавливаем через pip...${NC}"
-    pip install --upgrade pip
     pip install uv
 else
     curl -LsSf https://astral.sh/uv/install.sh | sh
