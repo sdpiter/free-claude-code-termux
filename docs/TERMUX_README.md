@@ -284,6 +284,26 @@ jobs
 tail -f server.log
 ```
 
+### Шаг 2: Запустите установщик
+
+Откройте Termux и выполните:
+
+```bash
+# Скачайте установщик
+curl -L https://raw.githubusercontent.com/Alishahryar1/free-claude-code-termux/main/scripts/termux_installer.sh -o install.sh
+
+# Сделайте исполняемым
+chmod +x install.sh
+
+# Запустите установку
+./install.sh
+```
+
+Или одной командой:
+```bash
+curl -L https://raw.githubusercontent.com/Alishahryar1/free-claude-code-termux/main/scripts/termux_installer.sh | bash
+```
+
 ### Управление процессами
 
 ```bash

@@ -172,7 +172,7 @@ check_fcc() {
     print_section "Проверка Free Claude Code"
 
     check_command "fcc-server" "fcc-server"
-    check_command "fcc" "fcc"
+    check_command "fcc-claude" "fcc-claude"
 
     # Проверка скриптов запуска
     check_file "$HOME/start_fcc_server.sh" "Скрипт запуска сервера"
@@ -193,10 +193,10 @@ check_processes() {
         print_warning "fcc-server не запущен"
     fi
 
-    if pgrep -f "fcc" > /dev/null; then
-        print_success "fcc запущен"
+    if pgrep -f "fcc-claude" > /dev/null; then
+        print_success "fcc-claude запущен"
     else
-        print_warning "fcc не запущен"
+        print_warning "fcc-claude не запущен"
     fi
 }
 

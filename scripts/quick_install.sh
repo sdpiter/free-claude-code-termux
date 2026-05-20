@@ -40,13 +40,15 @@ echo -e "${YELLOW}📦 Создание скриптов запуска...${NC}"
 
 cat > ~/start_fcc_server.sh << 'EOF'
 #!/usr/bin/env bash
+export PATH="$HOME/.local/bin:$PATH"
 fcc-server --host 0.0.0.0 --port 8082
 EOF
 chmod +x ~/start_fcc_server.sh
 
 cat > ~/start_fcc_claude.sh << 'EOF'
 #!/usr/bin/env bash
-fcc
+export PATH="$HOME/.local/bin:$PATH"
+fcc-claude
 EOF
 chmod +x ~/start_fcc_claude.sh
 

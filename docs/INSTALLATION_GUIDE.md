@@ -107,13 +107,15 @@ uv tool install --force git+https://github.com/Alishahryar1/free-claude-code.git
 # 4. Создайте скрипты запуска
 cat > ~/start_fcc_server.sh << 'EOF'
 #!/usr/bin/env bash
+export PATH="$HOME/.local/bin:$PATH"
 fcc-server --host 0.0.0.0 --port 8082
 EOF
 chmod +x ~/start_fcc_server.sh
 
 cat > ~/start_fcc_claude.sh << 'EOF'
 #!/usr/bin/env bash
-fcc
+export PATH="$HOME/.local/bin:$PATH"
+fcc-claude
 EOF
 chmod +x ~/start_fcc_claude.sh
 
@@ -205,7 +207,7 @@ uv --version
 
 # Проверьте Free Claude Code
 fcc-server --version
-fcc --version
+fcc-claude --version
 ```
 
 ### 3. Проверка сервера

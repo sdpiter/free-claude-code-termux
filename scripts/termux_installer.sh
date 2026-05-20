@@ -161,6 +161,7 @@ create_startup_scripts() {
 #!/usr/bin/env bash
 # Free Claude Code Server Launcher
 
+export PATH="$HOME/.local/bin:$PATH"
 echo "🚀 Запуск Free Claude Code Server..."
 fcc-server --host 0.0.0.0 --port 8082
 EOF
@@ -172,8 +173,9 @@ EOF
 #!/usr/bin/env bash
 # Free Claude Code CLI Launcher
 
+export PATH="$HOME/.local/bin:$PATH"
 echo "🤖 Запуск Free Claude Code CLI..."
-fcc
+fcc-claude
 EOF
 
     chmod +x ~/start_fcc_claude.sh

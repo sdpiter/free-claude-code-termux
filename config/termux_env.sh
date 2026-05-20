@@ -189,7 +189,7 @@ start_fcc_server() {
 # Запуск FCC CLI
 start_fcc_cli() {
     echo "🤖 Запуск Free Claude Code CLI..."
-    fcc
+    fcc-claude
 }
 
 # Остановка FCC сервера
